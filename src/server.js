@@ -24,17 +24,27 @@ wss.on("connection", (socket) => {
   console.log("Connected to the Browser!!!");
 
   sockets.push(socket);
-
-  socket.on("close", () => {
-    console.log("Disconnected from the Browser");
-  });
+  socket["nickname"] = "Anonymous";
 
   socket.on("message", (data) => {
     let msg = data.toString();
 
-    sockets.forEach((socket) => {
-      socket.send(msg);
-    });
+    const parseMsg = JSON.parse(msg);
+
+    switch (parseMsg.type) {
+      case "new_message":
+        sockets.forEach((s) => {
+          s.send(`${socket.nickname}: ${parseMsg.payload}`);
+        });
+        break;
+      case "nickname":
+        socket["nickname"] = parseMsg.payload;
+        break;
+    }
+  });
+
+  socket.on("close", () => {
+    console.log("Disconnected from the Browser");
   });
 });
 
