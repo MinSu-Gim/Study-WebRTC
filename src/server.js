@@ -12,5 +12,9 @@ app.use("/public", express.static(__dirname + "/public"));
 app.get("/", (req, res) => res.render("home"));
 app.get("/*", (req, res) => res.redirect("/"));
 
+// HTTP 서버, WebSocket 서버 둘 다 실행
+const httpServer = http.createServer(app);
+const wsServer = new Server(httpServer);
+
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
 httpServer.listen(3000, handleListen);
