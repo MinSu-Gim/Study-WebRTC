@@ -110,11 +110,13 @@ let roomName;
 const welcome = document.getElementById("welcome");
 const welcomeForm = welcome.querySelector("form");
 
-function startMedia() {
+async function startMedia() {
   welcome.hidden = true;
   call.hidden = false;
 
-  getMedia();
+  await getMedia();
+
+  makeConnection();
 }
 
 function handleWelcomeSubmit(event) {
@@ -133,6 +135,28 @@ welcomeForm.addEventListener("submit", handleWelcomeSubmit);
  * Socket Code
  */
 
-socket.on("welcome", () => {
-  console.log("someone joined");
+socket.on("welcome", async () => {
+  // create a invitation for the other browsers to join
+  // who we are, where we are
+  const offer = await myPeerConnection.createOffer();
+  // console.log(offer);
+  // Once we had a offer, we have to configure our connections with the offer we just created
+  myPeerConnection.setLocalDescription(offer);
+  // send the offer!
+  console.log(`Send the Offer: ${offer}`);
+  socket.emit("offer", offer, roomName);
 });
+
+socket.on("offer", (offer) => {
+  console.log(`Get the Offer: ${offer}`);
+});
+
+/**
+ * RTC Code
+ */
+
+let myPeerConnection;
+function makeConnection() {
+  myPeerConnection = new RTCPeerConnection();
+  myStream.getTracks().forEach((track) => myPeerConnection.addTrack(track, myStream));
+}
