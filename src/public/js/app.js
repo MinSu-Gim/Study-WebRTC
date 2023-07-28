@@ -216,3 +216,79 @@ function makeConnection() {
 
   myStream.getTracks().forEach((track) => myPeerConnection.addTrack(track, myStream));
 }
+
+
+// async function startCapture() {
+//   let captureStream;
+
+//   try {
+//     captureStream = await navigator.mediaDevices.getDisplayMedia(
+//       {
+//         video: { cursor: 'always' },
+//         audio: { echoCancellation: true, noiseSuppression: true },
+//       }
+//     );
+
+//     const videoTrack = myStream.getVideoTracks()[0];
+
+//     console.log("b:", myFace)
+//     myFace.srcObject = captureStream; // 내 비디오 공유 화면으로 변경
+//     console.log("a:", myFace)
+//     if (myPeerConnection) {
+      
+//       const videoSender = captureStream.getSenders();
+
+//       let result;
+//       for (let i=0; i < videoSender.length; i++) {
+//         if (videoSender[i].track.kind === "video") {
+//           console.log("vs:", videoSender[i]);
+//           result = videoSender[i];
+//           break;
+//         }
+//       }
+
+//       result.replaceTrack(videoTrack);
+
+
+//       // console.log("videTrack:", videoTrack);
+//       // console.log("videoSender:", videoSender);
+      
+//       // videoSender.replaceTrack(videoTrack);
+//     }
+
+//   } catch (err) {
+//     console.error(`Error: ${err}`);
+//   }
+//   return captureStream;
+// }
+
+const startCapture = () => {
+  navigator.mediaDevices
+    .getDisplayMedia({
+      video: { cursor: 'always' },
+      audio: { echoCancellation: true, noiseSuppression: true },
+    })
+    .then((stream) => {
+      myFace.srcObject = stream; // 내 비디오 공유 화면으로 변경
+      const videoTrack = stream.getVideoTracks()[0];
+      myPeerConnection
+        .getSenders()
+        .find((sender) => sender.track.kind === videoTrack.kind)
+        .replaceTrack(videoTrack);
+
+      // videoTrack.onended = function () {
+      //   const screenTrack = stream.getVideoTracks()[0];
+      //   myPeerConnection
+      //     .getSenders()
+      //     .find((sender) => sender.track.kind === screenTrack.kind)
+      //     .replaceTrack(screenTrack);
+      //   stream.getTracks().forEach((track) => track.stop());
+      //   myFace.srcObject = userStream.current; // 내 비디오로 변경
+      // };
+    });
+};
+
+const remoteCall = document.getElementById("remote");
+remoteCall.addEventListener("click", (e) => {
+  startCapture();
+})
