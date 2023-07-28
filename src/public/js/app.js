@@ -235,7 +235,7 @@ function makeConnection() {
 //     myFace.srcObject = captureStream; // 내 비디오 공유 화면으로 변경
 //     console.log("a:", myFace)
 //     if (myPeerConnection) {
-      
+
 //       const videoSender = captureStream.getSenders();
 
 //       let result;
@@ -252,7 +252,7 @@ function makeConnection() {
 
 //       // console.log("videTrack:", videoTrack);
 //       // console.log("videoSender:", videoSender);
-      
+
 //       // videoSender.replaceTrack(videoTrack);
 //     }
 
@@ -276,15 +276,19 @@ const startCapture = () => {
         .find((sender) => sender.track.kind === videoTrack.kind)
         .replaceTrack(videoTrack);
 
-      // videoTrack.onended = function () {
-      //   const screenTrack = stream.getVideoTracks()[0];
-      //   myPeerConnection
-      //     .getSenders()
-      //     .find((sender) => sender.track.kind === screenTrack.kind)
-      //     .replaceTrack(screenTrack);
-      //   stream.getTracks().forEach((track) => track.stop());
-      //   myFace.srcObject = userStream.current; // 내 비디오로 변경
-      // };
+      videoTrack.onended = function () {
+        const screenTrack = stream.getVideoTracks()[0];
+        myPeerConnection
+          .getSenders()
+          .find((sender) => sender.track.kind === screenTrack.kind)
+          .replaceTrack(screenTrack);
+        stream.getTracks().forEach((track) => track.stop());
+        myFace.srcObject = myStream; // 본래 캠 들고오기
+        myPeerConnection
+        .getSenders()
+        .find((sender) => sender.track.kind === videoTrack.kind)
+        .replaceTrack(myStream.getVideoTracks()[0]);
+      };
     });
 };
 
