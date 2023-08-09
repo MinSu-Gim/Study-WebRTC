@@ -182,6 +182,11 @@ socket.on("ice", (ice) => {
   myPeerConnection.addIceCandidate(ice);
 });
 
+socket.on("diss", (data) => {
+  console.log(`diss diss`);
+  console.log(data);
+});
+
 /**
  * RTC Code
  */

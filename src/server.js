@@ -18,6 +18,9 @@ const httpServer = http.createServer(app);
 const wsServer = new Server(httpServer);
 
 wsServer.on("connection", (socket) => {
+  socket.on("disconnect", () => {
+    console.log("연결 종료");
+  });
   socket.on("join_room", (roomName) => {
     socket.join(roomName);
     socket.to(roomName).emit("welcome");

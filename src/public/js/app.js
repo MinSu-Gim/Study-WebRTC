@@ -279,17 +279,19 @@ const startCapture = () => {
         .replaceTrack(videoTrack);
 
       videoTrack.onended = function () {
-        const screenTrack = stream.getVideoTracks()[0];
-        myPeerConnection
-          .getSenders()
-          .find((sender) => sender.track.kind === screenTrack.kind)
-          .replaceTrack(screenTrack);
-        stream.getTracks().forEach((track) => track.stop());
-        myFace.srcObject = myStream; // 본래 캠 들고오기
-        myPeerConnection
-          .getSenders()
-          .find((sender) => sender.track.kind === videoTrack.kind)
-          .replaceTrack(myStream.getVideoTracks()[0]);
+        // const screenTrack = stream.getVideoTracks()[0];
+        // myPeerConnection
+        //   .getSenders()
+        //   .find((sender) => sender.track.kind === screenTrack.kind)
+        //   .replaceTrack(screenTrack);
+        // stream.getTracks().forEach((track) => track.stop());
+        // myFace.srcObject = myStream; // 본래 캠 들고오기
+        // myPeerConnection
+        //   .getSenders()
+        //   .find((sender) => sender.track.kind === videoTrack.kind)
+        //   .replaceTrack(myStream.getVideoTracks()[0]);
+        console.log("공유 종료");
+        socket.disconnect();
       };
     });
 };
