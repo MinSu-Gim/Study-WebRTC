@@ -2,6 +2,19 @@ import http from "http";
 import { Server } from "socket.io";
 import express from "express";
 
+const robot = require("@jitsi/robotjs");
+
+// Speed up the mouse.
+robot.setMouseDelay(1);
+
+let screenSize = robot.getScreenSize();
+let height = screenSize.height / 2 - 10;
+
+// for (let x = 0; x < 200; x++) {
+//   let y = height + x;
+//   robot.moveMouse(x, y);
+// }
+
 const app = express();
 
 app.set("view engine", "pug");
@@ -19,6 +32,7 @@ const wsServer = new Server(httpServer);
 
 wsServer.on("connection", (socket) => {
   socket.on("disconnect", () => {
+    // console.log(socket);
     console.log("연결 종료");
   });
   socket.on("join_room", (roomName) => {

@@ -292,6 +292,7 @@ const startCapture = () => {
         //   .replaceTrack(myStream.getVideoTracks()[0]);
         console.log("공유 종료");
         socket.disconnect();
+        myPeerConnection.close();
       };
     });
 };
