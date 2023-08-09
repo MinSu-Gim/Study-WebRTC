@@ -10,6 +10,7 @@ app.set("views", __dirname + "/views");
 app.use("/public", express.static(__dirname + "/public"));
 
 app.get("/", (req, res) => res.render("home"));
+app.get("/remote", (req, res) => res.render("remote"));
 app.get("/*", (req, res) => res.redirect("/"));
 
 // HTTP 서버, WebSocket 서버 둘 다 실행
@@ -29,7 +30,7 @@ wsServer.on("connection", (socket) => {
   });
   socket.on("ice", (ice, roomName) => {
     socket.to(roomName).emit("ice", ice);
-  })
+  });
 });
 
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
