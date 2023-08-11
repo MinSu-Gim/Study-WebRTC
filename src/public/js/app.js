@@ -55,7 +55,7 @@ async function getMedia(deviceId) {
       await getCameras();
     }
   } catch (e) {
-    console.log(e);
+    console.log("error: ", e);
   }
 }
 
@@ -141,8 +141,8 @@ async function handleWelcomeSubmit(event) {
 }
 
 // 주석
-window.onload = handleWelcomeSubmit;
-// welcomeForm.addEventListener("submit", handleWelcomeSubmit);
+// window.onload = handleWelcomeSubmit;
+welcomeForm.addEventListener("submit", handleWelcomeSubmit);
 
 /**
  * Socket Code
@@ -291,6 +291,8 @@ const startCapture = () => {
         //   .find((sender) => sender.track.kind === videoTrack.kind)
         //   .replaceTrack(myStream.getVideoTracks()[0]);
         console.log("공유 종료");
+        console.log("roomName: ", roomName)
+        socket.emit("close-event", roomName);
         socket.disconnect();
         myPeerConnection.close();
       };

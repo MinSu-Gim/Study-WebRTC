@@ -31,9 +31,17 @@ const httpServer = http.createServer(app);
 const wsServer = new Server(httpServer);
 
 wsServer.on("connection", (socket) => {
+  
+  /**
+   * Socket 관련 Listener
+   */
+
   socket.on("disconnect", () => {
-    // console.log(socket);
     console.log("연결 종료");
+  });
+  socket.on("close-event", (roomName) => {
+    console.log("server roomName: ", roomName)
+    socket.to(roomName).emit("close-event");
   });
   socket.on("join_room", (roomName) => {
     socket.join(roomName);
@@ -47,6 +55,60 @@ wsServer.on("connection", (socket) => {
   });
   socket.on("ice", (ice, roomName) => {
     socket.to(roomName).emit("ice", ice);
+  });
+
+  /**
+   * RobotJS 관련 Listener
+   */
+
+  function convertCoord(coords, xy) {
+    if (xy === "x") {
+      return (robot.getScreenSize().width * coords.x) / coords.videoWidth;
+    } else if (xy === "y") {
+      return (robot.getScreenSize().height * coords.y) / coords.videoHeight;
+    } else {
+      return;
+    }
+  }
+
+  // socket.on("leftClick", (coords) => {
+  //   console.log("click")
+  //   robot.moveMouse(convertCoord(coords, "x"), convertCoord(coords, "y"));
+  // });
+
+  // socket.on("rightClick", (coords) => {
+  //   robot.moveMouse(convertCoord(coords, "x"), convertCoord(coords, "y"));
+  //   robot.mouseClick("right");
+  // });
+
+  // socket.on("mouseDown", (coords) => {
+  //   robot.moveMouse(convertCoord(coords, "x"), convertCoord(coords, "y"));
+  //   robot.mouseToggle("down");
+  // });
+
+  // socket.on("mouseMove", (coords) => {
+  //   robot.moveMouse(convertCoord(coords, "x"), convertCoord(coords, "y"));
+  // });
+
+  // socket.on("dragMouse", (coords) => {
+  //   robot.dragMouse(convertCoord(coords, "x"), convertCoord(coords, "y"));
+  // });
+
+  // socket.on("mouseUp", () => {
+  //   robot.mouseToggle("up");
+  // });
+
+  // socket.on("scroll", (delta) => {
+  //   robot.scrollMouse(delta.x, delta.y);
+  // });
+
+  socket.on("keyDown", (key) => {
+    console.log("keyDown");
+    robot.keyTap(key);
+  });
+
+  socket.on("keyUp", (key) => {
+    console.log("keyUp")
   });
 });
 

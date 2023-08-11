@@ -141,8 +141,8 @@ async function handleWelcomeSubmit(event) {
 }
 
 // 주석
-window.onload = handleWelcomeSubmit;
-// welcomeForm.addEventListener("submit", handleWelcomeSubmit);
+// window.onload = handleWelcomeSubmit;
+welcomeForm.addEventListener("submit", handleWelcomeSubmit);
 
 /**
  * Socket Code
@@ -187,9 +187,87 @@ socket.on("diss", (data) => {
   console.log(data);
 });
 
+socket.on("close-event", () => {
+  socket.close();
+});
+
 /**
  * RTC Code
  */
+
+// 조작
+window.onload = function () {
+  var video = document.querySelector("#myFace");
+  var stream11 = document.querySelector("#myStream");
+
+  class coordsAndSize {
+    constructor(event, video) {
+      this.x = event.clientX - video.getBoundingClientRect().left;
+      this.y = event.clientY - video.getBoundingClientRect().top;
+      this.videoWidth = video.getBoundingClientRect().width;
+      this.videoHeight = video.getBoundingClientRect().height;
+    }
+  }
+
+  console.dir(video);
+  console.dir(stream11);
+
+  video.addEventListener("click", function (event) {
+    event.stopPropagation();
+    console.log("click");
+    socket.emit("leftClick", new coordsAndSize(event, video));
+  });
+
+  video.addEventListener("contextmenu", function (event) {
+    console.log("contextmenu")
+    event.preventDefault();
+    socket.emit("rightClick", new coordsAndSize(event, video));
+  });
+
+  video.addEventListener("mousedown", function () {
+    console.log("mousedown")
+    socket.emit("mouseDown", new coordsAndSize(event, video));
+    isDraggingMouse = true;
+  });
+
+  video.addEventListener("mouseup", function () {
+    console.log("mouseup")
+    socket.emit("mouseUp");
+    isDraggingMouse = false;
+  });
+
+  video.addEventListener("wheel", function (event) {
+    console.log("wheel")
+    socket.emit("scroll", {
+      x: event.deltaX,
+      y: event.deltaY,
+    });
+  });
+
+  stream11.addEventListener("keydown", (event) => {
+    console.log("test")
+    console.log(event.key);
+    socket.emit("keyDown", event.key);
+  });
+
+  stream11.addEventListener("keyup", (event) => {
+    console.log("test")
+    console.log(event.key);
+    socket.emit("keyUp", event.key);
+  });
+
+  stream11.addEventListener("keypress", (event) => {
+    console.log("test")
+    console.log(event.key);
+    socket.emit("keyUp", event.key);
+  });
+
+  video.addEventListener("keypress", (event) => {
+    console.log("test")
+    console.log(event.key);
+    socket.emit("keyUp", event.key);
+  });
+};
 
 function handleIce(data) {
   console.log(`send Candidate`);
