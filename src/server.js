@@ -31,7 +31,6 @@ const httpServer = http.createServer(app);
 const wsServer = new Server(httpServer);
 
 wsServer.on("connection", (socket) => {
-  
   /**
    * Socket 관련 Listener
    */
@@ -40,7 +39,7 @@ wsServer.on("connection", (socket) => {
     console.log("연결 종료");
   });
   socket.on("close-event", (roomName) => {
-    console.log("server roomName: ", roomName)
+    console.log("server roomName: ", roomName);
     socket.to(roomName).emit("close-event");
   });
   socket.on("join_room", (roomName) => {
@@ -108,7 +107,7 @@ wsServer.on("connection", (socket) => {
   });
 
   socket.on("keyUp", (key) => {
-    console.log("keyUp")
+    console.log("keyUp");
   });
 });
 

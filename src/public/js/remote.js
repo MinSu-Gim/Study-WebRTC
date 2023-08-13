@@ -195,11 +195,13 @@ socket.on("close-event", () => {
  * RTC Code
  */
 
-// 조작
 window.onload = function () {
   var video = document.querySelector("#myFace");
   var stream11 = document.querySelector("#myStream");
 
+  /**
+   * Mouse, Keyboard Event
+   */
   class coordsAndSize {
     constructor(event, video) {
       this.x = event.clientX - video.getBoundingClientRect().left;
@@ -209,63 +211,36 @@ window.onload = function () {
     }
   }
 
-  console.dir(video);
-  console.dir(stream11);
-
   video.addEventListener("click", function (event) {
+    // console.log(video.getBoundingClientRect().left);
+    // console.log(video.getBoundingClientRect().right);
+    // console.log(video.getBoundingClientRect().width);
+    // console.log(video.getBoundingClientRect().height);
     event.stopPropagation();
-    console.log("click");
+    console.log("click: ", event);
     socket.emit("leftClick", new coordsAndSize(event, video));
   });
 
   video.addEventListener("contextmenu", function (event) {
-    console.log("contextmenu")
+    console.log("contextmenu: ", event);
     event.preventDefault();
     socket.emit("rightClick", new coordsAndSize(event, video));
   });
 
-  video.addEventListener("mousedown", function () {
-    console.log("mousedown")
-    socket.emit("mouseDown", new coordsAndSize(event, video));
-    isDraggingMouse = true;
-  });
-
-  video.addEventListener("mouseup", function () {
-    console.log("mouseup")
-    socket.emit("mouseUp");
-    isDraggingMouse = false;
-  });
-
   video.addEventListener("wheel", function (event) {
-    console.log("wheel")
+    event.stopPropagation();
+    event.preventDefault();
+    console.log("wheel");
     socket.emit("scroll", {
       x: event.deltaX,
       y: event.deltaY,
     });
   });
 
-  stream11.addEventListener("keydown", (event) => {
-    console.log("test")
-    console.log(event.key);
-    socket.emit("keyDown", event.key);
-  });
-
-  stream11.addEventListener("keyup", (event) => {
-    console.log("test")
-    console.log(event.key);
-    socket.emit("keyUp", event.key);
-  });
-
-  stream11.addEventListener("keypress", (event) => {
-    console.log("test")
-    console.log(event.key);
-    socket.emit("keyUp", event.key);
-  });
-
   video.addEventListener("keypress", (event) => {
-    console.log("test")
-    console.log(event.key);
-    socket.emit("keyUp", event.key);
+    event.stopPropagation();
+    console.log(event);
+    // socket.emit("keyUp", event.key);
   });
 };
 
