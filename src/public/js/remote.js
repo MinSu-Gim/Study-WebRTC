@@ -5,9 +5,9 @@ const muteBtn = document.getElementById("mute");
 const cameraBtn = document.getElementById("camera");
 const camerasSelect = document.getElementById("cameras");
 
-const call = document.getElementById("call");
+const enterBtn = document.getElementById("call");
 
-call.hidden = true;
+enterBtn.hidden = true;
 
 let myStream;
 let muted = false;
@@ -49,7 +49,7 @@ async function getMedia(deviceId) {
 
   try {
     myStream = await navigator.mediaDevices.getUserMedia(deviceId ? cameraConstraints : initialConstrains);
-    myFace.srcObject = myStream;
+    share_screen.srcObject = myStream;
 
     if (!deviceId) {
       await getCameras();
@@ -120,7 +120,7 @@ const welcomeForm = welcome.querySelector("form");
 
 async function initCall() {
   welcome.hidden = true;
-  call.hidden = false;
+  enterBtn.hidden = false;
 
   await getMedia();
 
@@ -256,7 +256,7 @@ function handleAddStream(data) {
   console.log("Mine Stream:", myStream);
 
   // const peerFace = document.getElementById("peerFace");
-  myFace.srcObject = data.stream;
+  share_screen.srcObject = data.stream;
 }
 
 let myPeerConnection;
@@ -330,7 +330,7 @@ const startCapture = () => {
       audio: { echoCancellation: true, noiseSuppression: true },
     })
     .then((stream) => {
-      myFace.srcObject = stream; // 내 비디오 공유 화면으로 변경
+      share_screen.srcObject = stream; // 내 비디오 공유 화면으로 변경
       const videoTrack = stream.getVideoTracks()[0];
       myPeerConnection
         .getSenders()
@@ -344,7 +344,7 @@ const startCapture = () => {
           .find((sender) => sender.track.kind === screenTrack.kind)
           .replaceTrack(screenTrack);
         stream.getTracks().forEach((track) => track.stop());
-        myFace.srcObject = myStream; // 본래 캠 들고오기
+        share_screen.srcObject = myStream; // 본래 캠 들고오기
         myPeerConnection
           .getSenders()
           .find((sender) => sender.track.kind === videoTrack.kind)

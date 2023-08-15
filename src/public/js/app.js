@@ -1,113 +1,11 @@
 const socket = io();
 
-const myFace = document.getElementById("myFace");
-const muteBtn = document.getElementById("mute");
-const cameraBtn = document.getElementById("camera");
-const camerasSelect = document.getElementById("cameras");
+const share_screen = document.getElementById("screen");
+const enterBtn = document.getElementById("enter");
 
-const call = document.getElementById("call");
-
-call.hidden = true;
+enterBtn.hidden = true;
 
 let myStream;
-let muted = false;
-let cameraOff = false;
-
-async function getCameras() {
-  try {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    // console.log(devices);
-    const cameras = devices.filter((devcie) => devcie.kind === "videoinput");
-    // console.log(cameras);
-    const currentCamera = myStream.getVideoTracks()[0];
-
-    cameras.forEach((camera) => {
-      const option = document.createElement("option");
-      option.value = camera.deviceId;
-      option.innerText = camera.label;
-
-      if (currentCamera.label === camera.label) {
-        option.selected = true;
-      }
-      camerasSelect.appendChild(option);
-    });
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-async function getMedia(deviceId) {
-  const initialConstrains = {
-    audio: true,
-    video: { facingMode: "user" },
-  };
-
-  const cameraConstraints = {
-    audio: true,
-    video: { deviceId: { exact: deviceId } },
-  };
-
-  try {
-    myStream = await navigator.mediaDevices.getUserMedia(deviceId ? cameraConstraints : initialConstrains);
-    myFace.srcObject = myStream;
-
-    if (!deviceId) {
-      await getCameras();
-    }
-  } catch (e) {
-    console.log("error: ", e);
-  }
-}
-
-// getMedia();
-
-function handleMuteClick() {
-  // console.log(myStream.getAudioTracks());
-  // console.log(myStream.getVideoTracks());
-
-  myStream.getAudioTracks().forEach((track) => {
-    track.enabled = !track.enabled;
-  });
-
-  if (!muted) {
-    muteBtn.innerText = "UnMute";
-    muted = true;
-  } else {
-    muteBtn.innerText = "Mute";
-    muted = false;
-  }
-}
-
-function handleCameraClick() {
-  myStream.getVideoTracks().forEach((track) => {
-    track.enabled = !track.enabled;
-  });
-
-  if (cameraOff) {
-    cameraBtn.innerText = "Turn Camera Off";
-    cameraOff = false;
-  } else {
-    cameraBtn.innerText = "Turn Camera On";
-    cameraOff = true;
-  }
-}
-
-async function handleCameraChange() {
-  // console.log(camerasSelect.value);
-  await getMedia(camerasSelect.value);
-
-  if (myPeerConnection) {
-    const videoTrack = myStream.getVideoTracks()[0];
-    const videoSender = myPeerConnection.getSenders().find((sender) => {
-      sender.track.kind === "video";
-    });
-    videoSender.replaceTrack(videoTrack);
-  }
-}
-
-muteBtn.addEventListener("click", handleMuteClick);
-cameraBtn.addEventListener("click", handleCameraClick);
-camerasSelect.addEventListener("input", handleCameraChange);
 
 /**
  * Welcome Form (Join a Room!)
@@ -118,11 +16,31 @@ let roomName;
 const welcome = document.getElementById("welcome");
 const welcomeForm = welcome.querySelector("form");
 
+async function startCapture() {
+  await navigator.mediaDevices
+    .getDisplayMedia({
+      video: { cursor: "always" },
+      audio: { echoCancellation: true, noiseSuppression: true },
+    })
+    .then((stream) => {
+      myStream = stream;
+      share_screen.srcObject = stream;
+
+      const videoTrack = stream.getVideoTracks()[0];
+
+      videoTrack.onended = function () {
+        socket.emit("close-event", roomName);
+        socket.disconnect();
+        myPeerConnection.close();
+      };
+    });
+}
+
 async function initCall() {
   welcome.hidden = true;
-  call.hidden = false;
+  enterBtn.hidden = false;
 
-  await getMedia();
+  await startCapture();
 
   makeConnection();
 }
@@ -133,7 +51,9 @@ async function initCall() {
 async function handleWelcomeSubmit(event) {
   event.preventDefault();
   const input = welcomeForm.querySelector("input");
+
   await initCall();
+
   socket.emit("join_room", input.value);
 
   roomName = input.value;
@@ -196,8 +116,7 @@ function handleAddStream(data) {
   console.log("Peer Stream:", data.stream);
   console.log("Mine Stream:", myStream);
 
-  const peerFace = document.getElementById("peerFace");
-  peerFace.srcObject = data.stream;
+  share_screen.srcObject = data.stream;
 }
 
 let myPeerConnection;
@@ -218,88 +137,10 @@ function makeConnection() {
   myPeerConnection.addEventListener("icecandidate", handleIce);
   myPeerConnection.addEventListener("addstream", handleAddStream);
 
+  console.log("myStream: ", myStream);
   myStream.getTracks().forEach((track) => myPeerConnection.addTrack(track, myStream));
 }
 
-// async function startCapture() {
-//   let captureStream;
-
-//   try {
-//     captureStream = await navigator.mediaDevices.getDisplayMedia(
-//       {
-//         video: { cursor: 'always' },
-//         audio: { echoCancellation: true, noiseSuppression: true },
-//       }
-//     );
-
-//     const videoTrack = myStream.getVideoTracks()[0];
-
-//     console.log("b:", myFace)
-//     myFace.srcObject = captureStream; // 내 비디오 공유 화면으로 변경
-//     console.log("a:", myFace)
-//     if (myPeerConnection) {
-
-//       const videoSender = captureStream.getSenders();
-
-//       let result;
-//       for (let i=0; i < videoSender.length; i++) {
-//         if (videoSender[i].track.kind === "video") {
-//           console.log("vs:", videoSender[i]);
-//           result = videoSender[i];
-//           break;
-//         }
-//       }
-
-//       result.replaceTrack(videoTrack);
-
-//       // console.log("videTrack:", videoTrack);
-//       // console.log("videoSender:", videoSender);
-
-//       // videoSender.replaceTrack(videoTrack);
-//     }
-
-//   } catch (err) {
-//     console.error(`Error: ${err}`);
-//   }
-//   return captureStream;
-// }
-
-const startCapture = () => {
-  navigator.mediaDevices
-    .getDisplayMedia({
-      video: { cursor: "always" },
-      audio: { echoCancellation: true, noiseSuppression: true },
-    })
-    .then((stream) => {
-      myFace.srcObject = stream; // 내 비디오 공유 화면으로 변경
-      const videoTrack = stream.getVideoTracks()[0];
-      myPeerConnection
-        .getSenders()
-        .find((sender) => sender.track.kind === videoTrack.kind)
-        .replaceTrack(videoTrack);
-
-      videoTrack.onended = function () {
-        // const screenTrack = stream.getVideoTracks()[0];
-        // myPeerConnection
-        //   .getSenders()
-        //   .find((sender) => sender.track.kind === screenTrack.kind)
-        //   .replaceTrack(screenTrack);
-        // stream.getTracks().forEach((track) => track.stop());
-        // myFace.srcObject = myStream; // 본래 캠 들고오기
-        // myPeerConnection
-        //   .getSenders()
-        //   .find((sender) => sender.track.kind === videoTrack.kind)
-        //   .replaceTrack(myStream.getVideoTracks()[0]);
-        console.log("공유 종료");
-        console.log("roomName: ", roomName);
-        socket.emit("close-event", roomName);
-        socket.disconnect();
-        myPeerConnection.close();
-      };
-    });
-};
-
-const remoteCall = document.getElementById("remote");
-remoteCall.addEventListener("click", (e) => {
+share_screen.addEventListener("click", (e) => {
   startCapture();
 });
