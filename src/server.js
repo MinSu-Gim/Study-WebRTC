@@ -101,13 +101,9 @@ wsServer.on("connection", (socket) => {
   //   robot.scrollMouse(delta.x, delta.y);
   // });
 
-  socket.on("keyDown", (key) => {
-    console.log("keyDown");
-    robot.keyTap(key);
-  });
-
-  socket.on("keyUp", (key) => {
-    console.log("keyUp");
+  socket.on("keypress", (key) => {
+    console.log("keypress: ", key);
+    // robot.keyTap(key);
   });
 });
 

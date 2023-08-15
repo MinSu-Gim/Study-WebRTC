@@ -291,7 +291,7 @@ const startCapture = () => {
         //   .find((sender) => sender.track.kind === videoTrack.kind)
         //   .replaceTrack(myStream.getVideoTracks()[0]);
         console.log("공유 종료");
-        console.log("roomName: ", roomName)
+        console.log("roomName: ", roomName);
         socket.emit("close-event", roomName);
         socket.disconnect();
         myPeerConnection.close();

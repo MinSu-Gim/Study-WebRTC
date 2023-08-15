@@ -238,9 +238,10 @@ window.onload = function () {
   });
 
   video.addEventListener("keypress", (event) => {
+    event.preventDefault();
     event.stopPropagation();
     console.log(event);
-    // socket.emit("keyUp", event.key);
+    socket.emit("keypress", event.key);
   });
 };
 
