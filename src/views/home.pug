@@ -4,7 +4,7 @@ html(lang="en")
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title Noom
-    link(rel="stylesheet", href="https://unpkg.com/mvp.css")
+    link(rel="stylesheet", href="/public/css/remote.css")
   body
     main
       #welcome 
@@ -12,7 +12,6 @@ html(lang="en")
           input(placeholder="room name", required, type="text")
           button Enter Room
       div#enter
-        div#myStream
-          video#screen(autoplay, playsinline, width="100%", height="800")
+        video#screen(autoplay, playsinline)
     script(src="/socket.io/socket.io.js")
     script(src="/public/js/app.js")
